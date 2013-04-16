@@ -597,7 +597,7 @@ function cloudCore.registerUser( params )
 	if params.displayName ~= nil then pathParams = pathParams .. "&username=" .. params.displayName end
 	if params.firstName ~= nil then pathParams = pathParams .. "&first_name=" .. params.firstName end
 	if params.lastName ~= nil then pathParams = pathParams .. "&last_name=" .. params.lastName end
-	if params.email ~= nil then pathParams = pathParams .. "&email=" .. params.email end
+	if params.email ~= nil then pathParams = pathParams .. "&email=" .. _urlencode( params.email ) end
 	if params.password ~= nil then pathParams = pathParams .. "&password=" .. params.password end
 
 	local path = "users.json"
