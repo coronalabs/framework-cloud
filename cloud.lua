@@ -336,7 +336,7 @@ function cloudCore.login( params )
 	if params.type == "user" then
 		
 		if nil ~= params.email and nil ~= params.password then
-			pathParams = "login=" .. params.email .. "&password=" .. params.password
+			pathParams = "login=" .. _urlencode( params.email ).. "&password=" .. params.password
 		else
 			print( cloudCore.debugTextPrefix .. "You need to provide the email and password fields in the params table." )
 			return false
@@ -636,7 +636,7 @@ end
 -------------------------------------------------
 function cloudCore.recoverPassword( email )
 	
-	local params = "email=" .. email
+	local params = "email=" .. _urlencode( email )
 
 	local path = "users/forgot.json"
 
