@@ -1,10 +1,10 @@
 --****************************************************************************************
 --
 -- ====================================================================
--- Corona Cloud low-level layer LUA Library - Corona Plugin Format
+-- Corona Cloud low-level layer LUA Library
 -- ====================================================================
 --
--- File: lib-cloud.lua
+-- File: cloud.lua
 --
 -- Copyright © 2013 Corona Labs Inc. All Rights Reserved.
 --
@@ -588,6 +588,81 @@ function cloudCore.registerDevice ( deviceToken )
 end
 
 -------------------------------------------------
+-- cloudCore.unregisterDevice( deviceId )
+-------------------------------------------------
+function cloudCore.unregisterDevice( deviceId )
+	
+	local params = "auth_token=" .. cloudCore.authToken
+
+	local path = "devices/" .. deviceId .. ".json"
+
+	local  function networkListener( event )
+		if ( event.isError ) then
+			if cloudCore.debugEnabled then
+				print( cloudCore.debugTextPrefix .. "Network Error" )
+				print( cloudCore.debugTextPrefix .. "Error: " .. event.response )
+			end
+			
+			if nil ~= cloudCore._authListener then
+				local event = { name="authentication", type="unregisterDevice", error = event.response, response = nil }
+				cloudCore._authListener( event )
+			end
+
+		else
+			if cloudCore.debugEnabled then
+				print( cloudCore.debugTextPrefix .. "Deleted device: " .. event.response )
+			end
+			
+			if nil ~= cloudCore._authListener then
+				local event = { name="authentication", type="unregisterDevice", error = nil, response = event.response }
+				cloudCore._authListener( event )
+			end
+			
+		end
+	end
+
+	_deleteCC( path, params, networkListener )
+end
+
+-------------------------------------------------
+-- cloudCore.getDevices()
+-------------------------------------------------
+function cloudCore.getDevices()
+	
+	local params = "auth_token=" .. cloudCore.authToken
+
+	local path = "devices.json"
+
+	local  function networkListener( event )
+		if ( event.isError ) then
+			if cloudCore.debugEnabled then
+				print( cloudCore.debugTextPrefix .. "Network Error" )
+				print( cloudCore.debugTextPrefix .. "Error: " .. event.response )
+			end
+			
+			if nil ~= cloudCore._authListener then
+				local event = { name="authentication", type="getDevices", error = event.response, response = nil }
+				cloudCore._authListener( event )
+			end
+
+		else
+			if cloudCore.debugEnabled then
+				print( cloudCore.debugTextPrefix .. "Registered devices: " .. event.response )
+			end
+			
+			if nil ~= cloudCore._authListener then
+				local event = { name="authentication", type="getDevices", error = nil, response = event.response }
+				cloudCore._authListener( event )
+			end
+			
+		end
+	end
+
+	_getCC( path, params, networkListener )
+end
+
+
+-------------------------------------------------
 -- cloudCore.register( params )
 -------------------------------------------------
 function cloudCore.registerUser( params )
@@ -721,11 +796,14 @@ function cloudCore.leaderboards.getAll()
 end
 
 -------------------------------------------------
--- cloudCore.leaderboards.getScores( leaderboardID )
+-- cloudCore.leaderboards.getScores( leaderboardID, pageNumber )
 -------------------------------------------------
-function cloudCore.leaderboards.getScores( leaderboardID )
+function cloudCore.leaderboards.getScores( leaderboardID, pageNumber )
 	
 	local params = "auth_token=" .. cloudCore.authToken
+	if nil ~= pageNumber and type( pageNumber ) == "number" then
+		params = params .. "&page=" .. pageNumber
+	end
 
 	local path = "leaderboards/" .. leaderboardID .. "/scores.json"
 
@@ -2076,9 +2154,9 @@ function cloudCore.match:addPlayer( userID, userAlert )
 end
 
 -------------------------------------------------
--- cloudCore.match:addRandomPlayer( userAlert )
+-- cloudCore.match:addRandomPlayer( userAlert, matchType )
 -------------------------------------------------
-function cloudCore.match:addRandomPlayer( userAlert )
+function cloudCore.match:addRandomPlayer( userAlert, matchType )
 	
 	local params = "auth_token=" .. cloudCore.authToken
 	
